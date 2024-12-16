@@ -1,114 +1,128 @@
 package com.example.trackier_inhancement
 
+import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.example.trackier_inhancement.ui.theme.Trackier_InhancementTheme
-import com.trackier.sdk.TrackierEvent
 import com.trackier.sdk.TrackierSDK
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var sensorManager: SensorManager
+    private var accelerometer: Sensor? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // Initialize SensorManager and accelerometer
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
         setContent {
             Trackier_InhancementTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-
-                    val coroutine = rememberCoroutineScope()
-
-                    Column (
-                        modifier = Modifier.padding(innerPadding)
-                    ){
-                        Button(onClick = {
-                            val event = TrackierEvent(TrackierEvent.UPDATE)
-                            event.param1 = "Param_Name"
-                            event.couponCode = "TEST_COUPON"
-                            event.discount = 10.5f
-//            event.c_code = "testing"
-//            event.discount = 3f
-//            TrackierSDK.setUserName("abcd")
-//            TrackierSDK.setUserPhone("1234456545")
-                            TrackierSDK.trackEvent(event)
-                            Log.d("TAG", "onClick: event_track ")
-                        }) {
-                            Text("Send Now")
-
-                        }
-
-                        Button(onClick = {
-
-                            coroutine.launch {
-
-
-                                val response = TrackierSDK.createDynamicLink("https://example.com/product") {
-                                    setTitle("Amazing Product")
-                                    setDescription("Check out this amazing product")
-                                    setImageUrl("https://example.com/product.jpg")
-                                    setCustomPath("amazing-product")
-                                    setCampaign("summer-sale")
-                                }
-                                println("Short URL: ${response.shortUrl}")
-
-                                Log.d("ShortlInkk","${response.shortUrl}")
-
-                                val sendIntent: Intent = Intent().apply {
-                                    action = Intent.ACTION_SEND
-                                    putExtra(Intent.EXTRA_TEXT, "Join me on this app! ${response.shortUrl}")
-                                    type = "text/plain"
-                                }
-                                startActivity(Intent.createChooser(sendIntent, null))
-
-                            }
-
-                        }) {
-                            Text("Short_Link")
-                        }
-
-                        Button(onClick = {
-
-                            val deepLink = "https://yourapp.app.goo.gl/your_referral_code"
-
-                        }) {
-
-                            Text("Send Invite")
-                        }
-                    }
-                }
+                MainScreen(sensorManager, accelerometer)
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
- val event = TrackierEvent.INVITE
-}
+fun MainScreen(sensorManager: SensorManager, accelerometer: Sensor?) {
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Trackier_InhancementTheme {
-        Greeting("Android")
+    val coroutineScope = rememberCoroutineScope()
+    var shareUrl by remember { mutableStateOf("") }
+
+
+
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
+
+
+            // Button for Sending Events
+            Button(
+                onClick = {
+                    val event = com.trackier.sdk.TrackierEvent(com.trackier.sdk.TrackierEvent.UPDATE)
+                    event.param1 = "Param_Name"
+                    event.couponCode = "TEST_COUPON"
+                    event.discount = 10.5f
+                    TrackierSDK.trackEvent(event)
+                },
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text("Track Event")
+            }
+
+            // Button to Create Short Links
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        try {
+                            val response = TrackierSDK.createDynamicLink("https://example.com/product") {
+                                setTitle("Amazing Product")
+                                setDescription("Check out this amazing product")
+                                setImageUrl("https://example.com/product.jpg")
+                                setCustomPath("amazing-product")
+                                setCampaign("summer-sale")
+                            }
+                            Log.d("ShortLink", response.shortUrl)
+                            shareUrl = response.shortUrl
+                        } catch (e: Exception) {
+                            Log.e("ShortLinkError", e.message ?: "Error creating short link")
+                        }
+                    }
+                },
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text("Create Short Link")
+            }
+
+            // Share URL Section
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TextField(
+                    value = shareUrl,
+                    onValueChange = { shareUrl = it },
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(CircleShape)
+                        .padding(8.dp)
+                )
+                IconButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, "Join me on this app! $shareUrl")
+                                type = "text/plain"
+                            }
+                          //  it.context.startActivity(Intent.createChooser(sendIntent, null))
+                        }
+                    }
+                ) {
+                    Icon(imageVector = Icons.Default.Send, contentDescription = "Send")
+                }
+            }
+        }
     }
 }
+
