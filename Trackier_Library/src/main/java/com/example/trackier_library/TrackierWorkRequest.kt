@@ -1,17 +1,23 @@
 package com.trackier.sdk
 
+import android.app.Application
+import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.work.*
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.trackier.sdk.SensorTrackingManager.SensorTrackingManager
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 
 class TrackierWorkRequest(
     val kind: String,
     private val appToken: String,
-    private val mode: String
+    private val mode: String,
+    private val context: Context
 ) {
     var gaid: String? = null
     var isLAT = false
@@ -38,8 +44,22 @@ class TrackierWorkRequest(
     var preinstallData: MutableMap<String, Any>? = null
     lateinit var storeRetargeting: Map<String, Any>
     var deeplinkUrl = ""
-    
+
+
+    private val sensorTrackingManager = SensorTrackingManager(context)
+    private var sensorData: Map<String, Float> = emptyMap()
+
+    init {
+        // Start tracking sensors when the object is created
+        sensorTrackingManager.startTracking()
+    }
+
+
+
+
     private fun setDefaults(): MutableMap<String, Any> {
+
+
         val body = mutableMapOf<String, Any>()
         body["device"] = this.device
         body["createdAt"] = createdAt
@@ -92,6 +112,11 @@ class TrackierWorkRequest(
         body["cname"] = customerName
         body["getPreLoadAndPAIdata"] = preinstallData.toString()
         body["storeRetargeting"] = storeRetargeting
+
+        // Add sensor data to the body if available
+        sensorData = sensorTrackingManager.getSensorData()
+        body["sensorData"] = sensorData
+
         return body
     }
 

@@ -58,4 +58,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation ("com.appsflyer:af-android-sdk:6.12.1")
+    implementation ("com.android.installreferrer:installreferrer:2.2")
+
 }

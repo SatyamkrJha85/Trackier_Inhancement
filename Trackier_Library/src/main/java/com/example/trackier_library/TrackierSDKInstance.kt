@@ -1,8 +1,13 @@
 package com.trackier.sdk
 
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.net.Uri
 import android.util.Log
+import com.trackier.sdk.SensorTrackingManager.SensorTrackingManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -40,7 +45,12 @@ class TrackierSDKInstance {
     var gender = ""
     var dob = ""
     var preinstallData: MutableMap<String, Any>? = null
-    
+
+    private var sensorTrackingManager: SensorTrackingManager? = null
+    private var sensorData: Map<String, Float> = emptyMap()
+
+
+
 
     /**
      * Initialize method should be called to initialize the sdk
@@ -57,6 +67,15 @@ class TrackierSDKInstance {
         this.isManualInstall = config.getManualMode()
         this.disableOrganicTrack = config.getOrganicTracking()
         DeviceInfo.init(device, this.config.context)
+
+        // Initialize sensor tracking manager
+        sensorTrackingManager = SensorTrackingManager(this.config.context)
+        sensorTrackingManager?.startTracking()
+
+
+        // Collect sensor data when initializing
+        collectSensorData()
+
         CoroutineScope(Dispatchers.IO).launch {
             for (i in 1..5) {
                val gadid =  initGaid()
@@ -73,6 +92,36 @@ class TrackierSDKInstance {
             callDeepLinkListener()
         }
     }
+
+    // Collect sensor data
+    private fun collectSensorData() {
+        // Get sensor data from SensorTrackingManager
+        sensorData = sensorTrackingManager?.getSensorData() ?: emptyMap()
+    }
+
+
+    // Log session data along with sensor data
+    private fun logSessionDataWithSensor() {
+        val sessionData = mutableMapOf<String, Any>(
+            "device" to device,
+            "createdAt" to Date(),
+            "isLAT" to isLAT,
+            "referrer" to getReferrerDetails().url,
+            "installId" to installId,
+            "appKey" to appToken,
+            "mode" to config.getManualMode(),
+            "sdkt" to "android"
+        )
+
+        // Include sensor data in the log
+        sessionData["sensorData"] = sensorData
+
+        // Log the session data with sensor data
+        Log.i("TrackierSDK", "Session body is: $sessionData")
+    }
+
+
+
 
     private suspend fun initGaid(): String {
         for (i in 1..5) {
@@ -168,7 +217,7 @@ class TrackierSDKInstance {
 
 
     private fun makeWorkRequest(kind: String): TrackierWorkRequest {
-        val trackierWorkRequest = TrackierWorkRequest(kind, appToken, this.config.env)
+        val trackierWorkRequest = TrackierWorkRequest(kind, appToken, this.config.env,this.config.context)
         if (this.config.getSDKType() != "android") {
             device.sdkVersion = this.config.getSDKVersion()
         } else {
@@ -310,6 +359,8 @@ class TrackierSDKInstance {
         if (!isInstallTracked()) {
             return
         }
+        collectSensorData()  // Collect sensor data before tracking the session
+
         val currentTs = Date().time
         val currentTime = Util.dateFormatter.format(currentTs)
         try {
@@ -320,6 +371,8 @@ class TrackierSDKInstance {
             val resp = APIRepository.processWork(wrkRequest)
             if (resp?.success == true) {
                 setLastSessionTime(currentTime)
+                logSessionDataWithSensor()  // Log session with sensor data
+
             }
         } catch (e: Exception) {}
     }

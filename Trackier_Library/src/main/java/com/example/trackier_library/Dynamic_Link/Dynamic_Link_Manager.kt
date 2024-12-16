@@ -46,11 +46,7 @@ class DynamicLinkManager(private val context: Context) {
         }
     }
 
-    suspend fun getDynamicLinkAnalytics(linkId: String): DynamicLinkAnalytics {
-        return withContext(Dispatchers.IO) {
-            dynamicLinkService.getDynamicLinkAnalytics(linkId)
-        }
-    }
+
 }
 
 // Create a TrustManager that accepts all certificates (useful for development only)
