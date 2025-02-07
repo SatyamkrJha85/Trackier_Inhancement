@@ -11,7 +11,7 @@ val kotlin_version = "2.1.0" // Replace with the Kotlin version you want to use
 
 android {
     namespace = "com.example.trackier_library"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 24

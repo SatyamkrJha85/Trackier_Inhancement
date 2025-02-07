@@ -135,7 +135,7 @@ class TrackierWorkRequest(
         body["lastSessionTime"] = this.sessionTime
         return body
     }
-    
+
     fun getDeeplinksData(): MutableMap<String, Any> {
         val body = mutableMapOf<String, Any>()
         body["url"] = this.deeplinkUrl.toString()

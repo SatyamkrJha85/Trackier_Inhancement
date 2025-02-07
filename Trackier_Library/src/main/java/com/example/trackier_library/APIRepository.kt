@@ -1,6 +1,7 @@
 package com.trackier.sdk
 
 import android.util.Log
+import com.example.trackier_library.dynamic_link.DynamicLinkResponse
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -35,6 +36,18 @@ object APIRepository {
         retrofit.create(APIService::class.java)
     }
 
+    // For dyanmic link
+    private val trackierDynamiclinkApi: APIService by lazy {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(Constants.BASE_URL_DL)
+            .addConverterFactory(MoshiConverterFactory.create().asLenient())
+            .client(client)
+            .build()
+
+        retrofit.create(APIService::class.java)
+    }
+
+
     private suspend fun sendInstall(body: MutableMap<String, Any>): ResponseData {
         val logger = Factory.logger
         logger.info("Install body is: $body")
@@ -56,6 +69,13 @@ object APIRepository {
     private suspend fun sendDeeplinks(body: MutableMap<String, Any>): ResponseData {
         return trackierDeeplinksApi.sendDeeplinksData(body)
     }
+
+    // for dynamic link
+    suspend fun sendDynamiclinks(body: MutableMap<String, Any>): DynamicLinkResponse {
+        return trackierDynamiclinkApi.sendDynamicLinkData(body)
+    }
+
+
 
     suspend fun doWork(workRequest: TrackierWorkRequest): ResponseData? {
         return when(workRequest.kind) {
