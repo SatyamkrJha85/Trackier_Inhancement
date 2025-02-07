@@ -36,3 +36,4 @@ data class DlData(
     @Json(name = "dlv") val dlv: String?,
     @Json(name = "sdkparams") val sdkParams: MutableMap<String, Any>?
 )
+

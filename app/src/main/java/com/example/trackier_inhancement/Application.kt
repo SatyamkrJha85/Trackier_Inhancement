@@ -2,6 +2,9 @@ package com.example.trackier_inhancement
 
 import android.app.Application
 import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
+import com.adjust.sdk.Adjust
+import com.adjust.sdk.AdjustConfig
+import com.adjust.sdk.LogLevel
 import com.appsflyer.AppsFlyerLib
 import com.trackier.sdk.TrackierSDK
 import com.trackier.sdk.TrackierSDKConfig
@@ -34,6 +37,21 @@ class Application:Application() {
         // Aps flyer
         AppsFlyerLib.getInstance().init("pM8cmRzy2KQ5aFA4N4aoNN", null, this)
         AppsFlyerLib.getInstance().start(this)
+
+
+        // Adjust
+
+
+        val appToken = "cFaqWupQV4BTCgpXFkQY1jgiAFggSdPl"
+        val environment = AdjustConfig.ENVIRONMENT_PRODUCTION // Use ENVIRONMENT_PRODUCTION for production
+
+        val config = AdjustConfig(this, appToken, environment)
+        config.setLogLevel(LogLevel.VERBOSE) // Optional: set log level
+
+        Adjust.onCreate(config)
+
+
+
     }
 
 

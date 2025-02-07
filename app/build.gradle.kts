@@ -61,5 +61,11 @@ dependencies {
 
     implementation ("com.appsflyer:af-android-sdk:6.12.1")
     implementation ("com.android.installreferrer:installreferrer:2.2")
+    implementation ("com.adjust.sdk:adjust-android:4.33.0")
+
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+
+
+
 
 }

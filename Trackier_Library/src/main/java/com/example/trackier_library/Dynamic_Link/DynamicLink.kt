@@ -1,69 +1,64 @@
-package com.example.trackier_library.Dynamic_Link
+package com.example.trackier_library.dynamic_link
+import android.net.Uri
 
+class DynamicLink private constructor() {
+    private var templateId: String = ""
+    private var link: Uri? = null
+    private var domainUriPrefix: String = ""
+    private var campaign: String = ""
+    private var channel: String = ""
+    private var mediaSource: String = ""
+    private var deepLinkValue: String = ""
+    private var androidParameters: AndroidParameters? = null
+    private var iosParameters: IosParameters? = null
+    private var desktopParameters: DesktopParameters? = null
+    private var sdkParameters: Map<String, String> = emptyMap()
+    private var attributionParameters: Map<String, String> = emptyMap()
+    private var socialMetaTagParameters: SocialMetaTagParameters? = null
 
-import androidx.annotation.Keep
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+    class Builder {
+        private val dynamicLink = DynamicLink()
 
-// Model
+        fun setTemplateId(templateId: String) = apply { dynamicLink.templateId = templateId }
+        fun setLink(link: Uri) = apply { dynamicLink.link = link }
+        fun setDomainUriPrefix(domainUriPrefix: String) = apply { dynamicLink.domainUriPrefix = domainUriPrefix }
+        fun setCampaign(campaign: String) = apply { dynamicLink.campaign = campaign }
+        fun setChannel(channel: String) = apply { dynamicLink.channel = channel }
+        fun setMediaSource(mediaSource: String) = apply { dynamicLink.mediaSource = mediaSource }
+        fun setDeepLinkValue(deepLinkValue: String) = apply { dynamicLink.deepLinkValue = deepLinkValue }
+        fun setAndroidParameters(androidParameters: AndroidParameters) = apply { dynamicLink.androidParameters = androidParameters }
+        fun setIosParameters(iosParameters: IosParameters) = apply { dynamicLink.iosParameters = iosParameters }
+        fun setDesktopParameters(desktopParameters: DesktopParameters) = apply { dynamicLink.desktopParameters = desktopParameters }
+        fun setSDKParameters(sdkParameters: Map<String, String>) = apply { dynamicLink.sdkParameters = sdkParameters }
+        fun setAttributionParameters(attributionParameters: Map<String, String>) = apply { dynamicLink.attributionParameters = attributionParameters }
+        fun setSocialMetaTagParameters(socialMetaTagParameters: SocialMetaTagParameters) = apply { dynamicLink.socialMetaTagParameters = socialMetaTagParameters }
 
-@Keep
-@JsonClass(generateAdapter = true)
-data class DynamicLinkConfig(
-    val longUrl: String,
-    val title: String? = null,
-    val description: String? = null,
-    val imageUrl: String? = null,
-    val customPath: String? = null,
-    val customDomain: String? = null,
-    val campaign: String? = null,
-    val medium: String? = null,
-    val source: String? = null,
-    val additionalParams: Map<String, String>? = null
-)
+        fun build(): DynamicLink {
+            return dynamicLink
+        }
+    }
 
-@Keep
-@JsonClass(generateAdapter = true)
-data class DynamicLinkResponse(
-    @Json(name = "shortUrl") val shortUrl: String,
-    @Json(name = "longUrl") val longUrl: String,
-    @Json(name = "analytics") val analytics: DynamicLinkAnalytics?
-)
-
-@Keep
-@JsonClass(generateAdapter = true)
-data class DynamicLinkAnalytics(
-    @Json(name = "clicks") val clicks: Int,
-    @Json(name = "uniqueClicks") val uniqueClicks: Int
-)
-
-
-
-class DynamicLinkBuilder {
-    private var title: String? = null
-    private var description: String? = null
-    private var imageUrl: String? = null
-    private var customPath: String? = null
-    private var customDomain: String? = null
-    private var campaign: String? = null
-    private var medium: String? = null
-    private var source: String? = null
-    private val additionalParams = mutableMapOf<String, String>()
-
-    fun setTitle(title: String) = apply { this.title = title }
-    fun setDescription(description: String) = apply { this.description = description }
-    fun setImageUrl(imageUrl: String) = apply { this.imageUrl = imageUrl }
-    fun setCustomPath(customPath: String) = apply { this.customPath = customPath }
-    fun setCustomDomain(customDomain: String) = apply { this.customDomain = customDomain }
-    fun setCampaign(campaign: String) = apply { this.campaign = campaign }
-    fun setMedium(medium: String) = apply { this.medium = medium }
-    fun setSource(source: String) = apply { this.source = source }
-    fun addParameter(key: String, value: String) = apply { additionalParams[key] = value }
-
-    fun build(longUrl: String): DynamicLinkConfig {
+    fun toDynamicLinkConfig(): DynamicLinkConfig {
         return DynamicLinkConfig(
-            longUrl, title, description, imageUrl, customPath, customDomain,
-            campaign, medium, source, additionalParams
+            installId = "rfdfkj43rjwer", // Replace with actual install ID
+            appKey = "9944-djfjf3-43333", // Replace with actual app key
+            templateId = templateId,
+            link = link.toString(),
+            brandDomain = domainUriPrefix,
+            deepLinkValue = deepLinkValue,
+            sdkParameter = sdkParameters,
+            redirection = Redirection(
+                android = androidParameters?.redirectLink,
+                ios = iosParameters?.redirectLink,
+                desktop = desktopParameters?.redirectLink
+            ),
+            attrParameter = attributionParameters,
+            campaign = campaign,
+            mediaSource = mediaSource,
+            channel = channel,
+            socialMedia = socialMetaTagParameters?.let {
+                SocialMedia(it.title, it.description, it.imageLink)
+            }
         )
     }
 }
