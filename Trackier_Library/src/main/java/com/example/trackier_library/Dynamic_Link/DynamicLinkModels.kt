@@ -15,9 +15,6 @@ data class DynamicLinkConfig(
     @Json(name = "sdk_parameter") val sdkParameter: Map<String, String>? = null,
     @Json(name = "redirection") val redirection: Redirection? = null,
     @Json(name = "attr_parameter") val attrParameter: Map<String, String>? = null,
-    @Json(name = "campaign") val campaign: String,
-    @Json(name = "media_source") val mediaSource: String,
-    @Json(name = "channel") val channel: String? = null,
     @Json(name = "social_media") val socialMedia: SocialMedia? = null
 ) {
     fun toMutableMap(): MutableMap<String, Any> {
@@ -31,9 +28,6 @@ data class DynamicLinkConfig(
             "sdk_parameter" to (sdkParameter ?: emptyMap<String, String>()),
             "redirection" to (redirection?.toMutableMap() ?: emptyMap<String, String>()),
             "attr_parameter" to (attrParameter ?: emptyMap<String, String>()),
-            "campaign" to campaign,
-            "media_source" to mediaSource,
-            "channel" to (channel ?: ""),
             "social_media" to (socialMedia?.toMutableMap() ?: emptyMap<String, String>())
         )
     }
@@ -43,8 +37,17 @@ data class DynamicLinkConfig(
 @JsonClass(generateAdapter = true)
 data class DynamicLinkResponse(
     @Json(name = "success") val success: Boolean,
+    @Json(name = "message") val message: String,
+    @Json(name = "data") val data: LinkData
+)
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class LinkData(
     @Json(name = "link") val link: String
 )
+
+
 
 @Keep
 @JsonClass(generateAdapter = true)

@@ -27,7 +27,10 @@ import com.appsflyer.share.LinkGenerator
 import com.appsflyer.share.ShareInviteHelper
 import com.example.trackier_inhancement.ui.theme.Trackier_InhancementTheme
 import com.example.trackier_library.dynamic_link.*
+import com.trackier.sdk.Constants
 import com.trackier.sdk.TrackierSDK
+import com.trackier.sdk.TrackierSDKInstance
+import com.trackier.sdk.Util
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -360,22 +363,26 @@ fun CreateAppsFlyerShortLinkButton() {
 }
 
 private fun createDynamicLink() {
+
     // Build the dynamic link parameters
     val dynamicLink = DynamicLink.Builder()
-        .setTemplateId("your-template-id")
-        .setLink(Uri.parse("https://www.example.com/"))
-        .setDomainUriPrefix("https://your-domain.com")
-        .setCampaign("your-campaign")
-        .setChannel("your-channel")
-        .setMediaSource("your-media-source")
-        .setDeepLinkValue("your-deep-link-value")
+        .setTemplateId("Nq1rt1")
+        .setLink(Uri.parse("https://apptrove.com?utm_redirect=sdk_link"))
+        .setDomainUriPrefix("https://vistmarket.shop")
+        .setDeepLinkValue("NewMainActivity")
         .setAndroidParameters(
             AndroidParameters.Builder()
-                .setRedirectLink("https://www.example.com/android")
+                .setRedirectLink("https://play.google.com/store/apps/details?id=com.trackier.vistmarket")
                 .build()
         )
         .setSDKParameters(mapOf("param1" to "value1", "param2" to "value2"))
-        .setAttributionParameters(mapOf("source" to "user-action", "medium" to "social")
+        .setAttributionParameters(
+            channel = "my_channel",
+            campaign = "my_campaign",
+            mediaSource = "at_invite",
+            p1 = "param1_value",
+            p2 = "dfjsdfsdf",
+            p3 = "sdfsdfsdf"
         )
         .setIosParameters(
             IosParameters.Builder()
@@ -399,10 +406,20 @@ private fun createDynamicLink() {
     TrackierSDK.createDynamicLink(dynamicLink,
         onSuccess = { dynamicLinkUrl ->
             // Use the generated link
+            Log.d("dynamicsucess", dynamicLink.toString())
             println("Dynamic Link Created: $dynamicLinkUrl")
+            Log.d("Dynamic Link Result",dynamicLinkUrl)
         },
         onFailure = { errorMessage ->
-            // Handle the error
+            // Handle the errors
+
+        //    var installId = Util.getSharedPrefString(, Constants.SHARED_PREF_INSTALL_ID)
+
+            Log.d("dynamicfailedtoken","the token is  ${TrackierSDK.getAppToken()}")
+            Log.d("dynamicfailedtoken","the Install id  is  ${TrackierSDK.getTrackierId()}")
+
+
+            Log.d("dynamicfailed", dynamicLink.toString())
             println("Failed to create dynamic link: $errorMessage")
         }
     )

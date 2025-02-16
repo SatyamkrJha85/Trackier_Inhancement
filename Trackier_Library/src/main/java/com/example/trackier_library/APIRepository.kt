@@ -39,7 +39,7 @@ object APIRepository {
     // For dyanmic link
     private val trackierDynamiclinkApi: APIService by lazy {
         val retrofit = Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL_DL)
+            .baseUrl(Constants.BASE_URL_DYNAMIC_LINK)
             .addConverterFactory(MoshiConverterFactory.create().asLenient())
             .client(client)
             .build()

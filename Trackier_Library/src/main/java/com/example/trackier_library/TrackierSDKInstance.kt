@@ -9,6 +9,7 @@ import android.net.Uri
 import android.util.Log
 import com.example.trackier_library.dynamic_link.DynamicLink
 import com.example.trackier_library.dynamic_link.DynamicLinkResponse
+import com.example.trackier_library.dynamic_link.LinkData
 import com.trackier.sdk.SensorTrackingManager.SensorTrackingManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,7 +52,6 @@ class TrackierSDKInstance {
 
     private var sensorTrackingManager: SensorTrackingManager? = null
     private var sensorData: Map<String, Float> = emptyMap()
-
 
 
 
@@ -198,6 +198,7 @@ class TrackierSDKInstance {
 
     private fun getInstallID(): String {
         var installId = Util.getSharedPrefString(this.config.context, Constants.SHARED_PREF_INSTALL_ID)
+        Log.d("TrackierInstallID","The id is "+installId)
         if(installId.isBlank()){
             installId = UUID.randomUUID().toString()
             setInstallID(installId)
@@ -356,6 +357,7 @@ class TrackierSDKInstance {
     }
 
     suspend fun trackSession() {
+
         if (!isEnabled || !configLoaded) {
             return
         }
@@ -457,9 +459,13 @@ class TrackierSDKInstance {
             } catch (e: Exception) {
                 // Log the error and return a failure response
                 Factory.logger.severe("Error creating dynamic link: ${e.message}")
-                DynamicLinkResponse(success = false, link = "")
+                DynamicLinkResponse(success = false, message = "Failed to create link", data = LinkData(link = ""))
             }
         }
+    }
+
+    fun getAppToken(): String {
+        return appToken
     }
 
 }
