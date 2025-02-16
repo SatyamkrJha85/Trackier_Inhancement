@@ -299,10 +299,18 @@ object TrackierSDK {
                     onSuccess(link)
                 } ?: onFailure("Failed to retrieve link")
             } else {
-                onFailure("Failed to create dynamic link: ${response.message}")
+                val errorMessage = response.error?.let {
+                    "Error ${it.statusCode} (${it.errorCode}): ${it.codeMsg} - ${it.message}"
+                } ?: response.message ?: "Unknown error"
+
+                Log.e("TrackierDynamicLinkError", errorMessage)
+                onFailure(errorMessage)
             }
         }
     }
+
+
+
 
 
 }

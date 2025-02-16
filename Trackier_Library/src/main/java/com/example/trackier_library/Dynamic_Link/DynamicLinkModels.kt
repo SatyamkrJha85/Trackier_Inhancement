@@ -36,9 +36,20 @@ data class DynamicLinkConfig(
 @Keep
 @JsonClass(generateAdapter = true)
 data class DynamicLinkResponse(
-    @Json(name = "success") val success: Boolean,
-    @Json(name = "message") val message: String,
-    @Json(name = "data") val data: LinkData
+    val success: Boolean,
+    val message: String? = "Unknown error",  // ✅ Default value prevents missing field crash
+    val error: ErrorResponse? = null,
+    val data: LinkData? = null
+)
+
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class ErrorResponse(
+    @Json(name = "statusCode") val statusCode: Int,
+    @Json(name = "errorCode") val errorCode: String,
+    @Json(name = "codeMsg") val codeMsg: String,
+    @Json(name = "message") val message: String
 )
 
 @Keep
