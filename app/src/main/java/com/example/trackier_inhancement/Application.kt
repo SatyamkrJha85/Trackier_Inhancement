@@ -17,7 +17,7 @@ class Application:Application() {
     override fun onCreate() {
         super.onCreate()
 
-        val sdkConfig = TrackierSDKConfig(this, "cca7ae7e-239f-48e5-9990-864403e46686", "testing")
+        val sdkConfig = TrackierSDKConfig(this, "73059251-0b45-47f9-9ca1-7654f65c90d7", "development")
         TrackierSDK.initialize(sdkConfig,this)
 
 

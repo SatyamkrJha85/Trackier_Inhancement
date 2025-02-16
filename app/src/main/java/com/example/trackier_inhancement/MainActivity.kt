@@ -366,7 +366,7 @@ private fun createDynamicLink() {
 
     // Build the dynamic link parameters
     val dynamicLink = DynamicLink.Builder()
-        .setTemplateId("Nq1rt1")
+        .setTemplateId("xFmTij")
         .setLink(Uri.parse("https://apptrove.com?utm_redirect=sdk_link"))
         .setDomainUriPrefix("https://vistmarket.shop")
         .setDeepLinkValue("NewMainActivity")
@@ -411,16 +411,14 @@ private fun createDynamicLink() {
             Log.d("Dynamic Link Result",dynamicLinkUrl)
         },
         onFailure = { errorMessage ->
-            // Handle the errors
+//            // Handle the errors
+//            Log.d("dynamicfailedtoken","the token is  ${TrackierSDK.getAppToken()}")
+//           Log.d("dynamicfailedtoken","the Install id  is  ${TrackierSDK.getTrackierId()}")
 
-        //    var installId = Util.getSharedPrefString(, Constants.SHARED_PREF_INSTALL_ID)
-
-            Log.d("dynamicfailedtoken","the token is  ${TrackierSDK.getAppToken()}")
-            Log.d("dynamicfailedtoken","the Install id  is  ${TrackierSDK.getTrackierId()}")
-
-
-            Log.d("dynamicfailed", dynamicLink.toString())
+//            Log.d("dynamicfailed", dynamicLink.toString())
             println("Failed to create dynamic link: $errorMessage")
+             Log.d("dynamicfailed", errorMessage)
+
         }
     )
 }

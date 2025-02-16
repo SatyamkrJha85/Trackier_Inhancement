@@ -459,7 +459,7 @@ class TrackierSDKInstance {
             } catch (e: Exception) {
                 // Log the error and return a failure response
                 Factory.logger.severe("Error creating dynamic link: ${e.message}")
-                DynamicLinkResponse(success = false, message = "Failed to create link", data = LinkData(link = ""))
+                DynamicLinkResponse(success = false, message = "Failed to create link ${e.message}", data = LinkData(link = ""))
             }
         }
     }
