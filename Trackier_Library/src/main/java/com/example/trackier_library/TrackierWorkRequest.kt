@@ -46,12 +46,14 @@ class TrackierWorkRequest(
     var deeplinkUrl = ""
 
 
+
     private val sensorTrackingManager = SensorTrackingManager(context)
     private var sensorData: Map<String, Float> = emptyMap()
 
     init {
         // Start tracking sensors when the object is created
         sensorTrackingManager.startTracking()
+        Log.d("dynmaiclinkInstallId work request","key is : ${installID}")
     }
 
 
@@ -183,5 +185,6 @@ class TrackierWorkRequest(
                 .build()
             WorkManager.getInstance().enqueue(myWorkRequest)
         }
+
     }
 }

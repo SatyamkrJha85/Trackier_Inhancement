@@ -28,8 +28,8 @@ interface APIService {
 
 
     // Dynamic Link
+    @POST("generation")
+    @Headers("X-Client-SDK: ${Constants.SDK_VERSION}", "User-Agent: ${Constants.USER_AGENT}")
+    suspend fun sendDynamicLinkData(@Body data: MutableMap<String, Any>): DynamicLinkResponse
 
-    @POST("dynmiclink")
-    @Headers( "X-Client-SDK: ${Constants.SDK_VERSION}", "User-Agent: ${Constants.USER_AGENT}" )
-    suspend fun sendDynamicLinkData(@Body data:MutableMap<String,Any>): DynamicLinkResponse
 }

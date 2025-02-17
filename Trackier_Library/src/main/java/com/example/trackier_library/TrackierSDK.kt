@@ -37,6 +37,12 @@ object TrackierSDK {
     }
 
     @JvmStatic
+    fun getAppToken(): String {
+        return instance.getAppToken()
+    }
+
+
+    @JvmStatic
     fun isEnabled(): Boolean {
         return instance.isEnabled
     }
@@ -278,19 +284,6 @@ object TrackierSDK {
         )
     }
 
-//    @JvmStatic
-//    suspend fun createDynamicLink(dynamicLink: DynamicLink): DynamicLinkResponse {
-//        val config = dynamicLink.toDynamicLinkConfig()
-//
-//        return withContext(Dispatchers.IO) {
-//            try {
-//                APIRepository.sendDynamiclinks(config.toMutableMap())
-//            } catch (e: Exception) {
-//                logger.severe("Error creating dynamic link: ${e.message}")
-//                throw e
-//            }
-//        }
-//    }
 
 
     @JvmStatic
@@ -302,12 +295,24 @@ object TrackierSDK {
         CoroutineScope(Dispatchers.IO).launch {
             val response = instance.createDynamicLink(dynamicLink)
             if (response.success) {
-                onSuccess(response.link)
+                response.data?.link?.let { link ->
+                    Log.e("TrackierSDK","Your Dynamic Link is : "+ link)
+                    onSuccess(link)
+                } ?: onFailure("Failed to retrieve link")
             } else {
-                onFailure("Failed to create dynamic link")
+                val errorMessage = response.error?.let {
+                    "Error ${it.statusCode} (${it.errorCode}): ${it.codeMsg} - ${it.message}"
+                } ?: response.message ?: "Unknown error"
+
+                Log.e("TrackierSDK", errorMessage)
+                onFailure(errorMessage)
             }
         }
     }
+
+
+
+
 
 }
 
