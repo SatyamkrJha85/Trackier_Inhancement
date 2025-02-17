@@ -51,6 +51,19 @@ object APIRepository {
         retrofit.create(APIService::class.java)
     }
 
+    // For send Fcm Token
+    private val trackierFcmTokenApi: APIService by lazy {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(Constants.BASE_URL_DL)
+            .addConverterFactory(MoshiConverterFactory.create().asLenient())
+            .client(client)
+            .build()
+
+        retrofit.create(APIService::class.java)
+    }
+
+
+
 
     private suspend fun sendInstall(body: MutableMap<String, Any>): ResponseData {
         val logger = Factory.logger
@@ -68,6 +81,14 @@ object APIRepository {
         val logger = Factory.logger
         logger.info("Session body is: $body")
         return trackierApi.sendSessionData(body)
+    }
+
+
+    // Fcm Token
+    suspend fun sendToken(body: MutableMap<String, Any>): ResponseData {
+        val logger = Factory.logger
+        logger.info("Session body is: $body")
+        return trackierFcmTokenApi.sendFcmToken(body)
     }
     
     private suspend fun sendDeeplinks(body: MutableMap<String, Any>): ResponseData {
@@ -118,7 +139,7 @@ object APIRepository {
                 )
             }
         } catch (e: Exception) {
-            Log.e("TrackierSDK", "Exception: ${e.message}")
+            Log.d("TrackierSDK", "Exception: ${e.message}")
             DynamicLinkResponse(
                 success = false,
                 message = "Failed to create link. Exception: ${e.message}",

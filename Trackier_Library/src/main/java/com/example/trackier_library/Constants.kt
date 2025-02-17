@@ -54,6 +54,7 @@ object Constants {
     const val PRE_DEFINED_PATH2 = "/data/preinstall.trackier"
     const val SYSTEM_PATH = "/system/app/"
     const val PRE_INSTALL_MANIFEST_NAME = "TR_PRE_INSTALL_NAME"
+    const val SHARED_PREF_LAST_SESSION_DATE = "last_session_date"
     const val SHARED_PREF_LAST_SESSION_TIME = "last_session_time"
     const val SHARED_PREF_FIRST_INSTALL = "first_install"
     const val DEVICE_BRAND = "xiaomi"

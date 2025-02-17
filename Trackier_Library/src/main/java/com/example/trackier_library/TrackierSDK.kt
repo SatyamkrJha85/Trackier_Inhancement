@@ -5,7 +5,9 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.Keep
+import androidx.work.Logger
 import com.example.trackier_library.dynamic_link.DynamicLink
+import com.huawei.hms.ads.identifier.AdvertisingIdClient
 import com.trackier.sdk.SensorTrackingManager.SensorTrackingManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -296,6 +298,7 @@ object TrackierSDK {
             val response = instance.createDynamicLink(dynamicLink)
             if (response.success) {
                 response.data?.link?.let { link ->
+                    Log.e("TrackierSDK","Your Dynamic Link is : "+ link)
                     onSuccess(link)
                 } ?: onFailure("Failed to retrieve link")
             } else {
@@ -303,15 +306,64 @@ object TrackierSDK {
                     "Error ${it.statusCode} (${it.errorCode}): ${it.codeMsg} - ${it.message}"
                 } ?: response.message ?: "Unknown error"
 
-                Log.e("TrackierDynamicLinkError", errorMessage)
+                Log.e("TrackierSDK", errorMessage)
                 onFailure(errorMessage)
             }
         }
     }
 
+    @JvmStatic
+    fun sendFcmToken(token: String) {
+        if (!isInitialized) {
+            logger.finest("SDK Not Initialized")
+            return
+        }
+        if (!isEnabled()) {
+            logger.finest("SDK Disabled")
+            return
+        }
 
+        CoroutineScope(Dispatchers.IO).launch {
+            instance.sendFcmToken(token)
+        }
+    }
 
+    // New OAID Functionality
+//    @JvmStatic
+//    fun getOAID(context: Context, onResult: (String?) -> Unit) {
+//        if (!isInitialized) {
+//            logger.finest("SDK Not Initialized")
+//            onResult(null)
+//            return
+//        }
+//        CoroutineScope(Dispatchers.IO).launch {
+//            try {
+//                val advertisingIdInfo = AdvertisingIdClient.getAdvertisingIdInfo(context)
+//                val oaid = advertisingIdInfo?.id
+//                withContext(Dispatchers.Main) {
+//                    onResult(oaid)
+//                }
+//            } catch (e: Exception) {
+//                e.message?.let { Log.e("Failed to retrieve OAID: ${e.message}", it) }
+//                withContext(Dispatchers.Main) {
+//                    onResult(null)
+//                }
+//            }
+//        }
+//    }
 
+//    @JvmStatic
+//    fun logOAID(context: Context) {
+//        getOAID(context) { oaid ->
+//            if (oaid != null) {
+//                logger.info("OAID: $oaid")
+//                Log.d("TrackierSDK", "OAID retrieved: $oaid")
+//            } else {
+//                logger.warning("OAID not available")
+//                Log.d("TrackierSDK", "OAID not available")
+//            }
+//        }
+//    }
 
 }
 

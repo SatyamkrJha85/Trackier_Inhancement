@@ -25,11 +25,14 @@ interface APIService {
     @Headers( "X-Client-SDK: ${Constants.SDK_VERSION}", "User-Agent: ${Constants.USER_AGENT}" )
     suspend fun sendDeeplinksData(@Body data: MutableMap<String, Any>): ResponseData
 
-
-
     // Dynamic Link
     @POST("generation")
     @Headers("X-Client-SDK: ${Constants.SDK_VERSION}", "User-Agent: ${Constants.USER_AGENT}")
     suspend fun sendDynamicLinkData(@Body data: MutableMap<String, Any>): DynamicLinkResponse
+
+    // Fcm Token
+    @POST("token")
+    @Headers("X-Client-SDK: ${Constants.SDK_VERSION}", "User-Agent: ${Constants.USER_AGENT}")
+    suspend fun sendFcmToken(@Body data: MutableMap<String, Any>): ResponseData
 
 }

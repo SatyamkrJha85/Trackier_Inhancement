@@ -68,13 +68,6 @@ class DynamicLink private constructor() {
 
     fun toDynamicLinkConfig(): DynamicLinkConfig {
 
-        // want to use work request class for getting both key and id
-
-    //    val sdkInstance = TrackierSDKInstance()
-    //    var installId = Util.getSharedPrefString(sdkInstance.config.context, Constants.SHARED_PREF_INSTALL_ID)
-
-      //  Log.d("TrackierDynamiclinksdk","The id is "+installId)
-
         return DynamicLinkConfig(
            installId = TrackierSDK.getTrackierId(),
             appKey = TrackierSDK.getAppToken(),

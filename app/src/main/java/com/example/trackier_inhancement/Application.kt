@@ -26,6 +26,10 @@ class Application:Application() {
 
         TrackierSDK.enableSensorTracking()
 
+        // Example usage in your application
+        val fcmToken = "T*932H323rjjjDE#Hkfsf_TOken"
+        TrackierSDK.sendFcmToken(fcmToken)
+
 
       //   Start the session tracking in a coroutine
         GlobalScope.launch(Dispatchers.IO) {

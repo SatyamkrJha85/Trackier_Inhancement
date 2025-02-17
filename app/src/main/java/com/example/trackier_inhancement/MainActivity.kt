@@ -7,6 +7,7 @@ import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.MainThread
@@ -31,12 +32,13 @@ import com.trackier.sdk.Constants
 import com.trackier.sdk.TrackierSDK
 import com.trackier.sdk.TrackierSDKInstance
 import com.trackier.sdk.Util
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
-    private lateinit var webSocketClient: WebSocketClient
 
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
@@ -54,9 +56,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Replace "your-user-id" with the actual user ID
-        webSocketClient = WebSocketClient("your-user-id")
-        webSocketClient.connect()
     }
 
 
@@ -68,8 +67,21 @@ fun MainScreen(sensorManager: SensorManager, accelerometer: Sensor?) {
     val coroutineScope = rememberCoroutineScope()
     var shareUrl by remember { mutableStateOf("") }
     val context = LocalContext.current // Get the current context
-
-
+//
+//// Log OAID directly
+//    TrackierSDK.logOAID(context)
+//
+//    // Get OAID and handle it manually
+//    TrackierSDK.getOAID(context) { oaid ->
+//        if (oaid != null) {
+//            println("Retrieved OAID: $oaid")
+//            Log.d("OAIDIS Result",oaid)
+//        } else {
+//            println("OAID not available")
+//            Log.d("OAIDIS","OAID Failed")
+//
+//        }
+//    }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -78,12 +90,12 @@ fun MainScreen(sensorManager: SensorManager, accelerometer: Sensor?) {
             // Button for Sending Events
             Button(
                 onClick = {
-                    val event = com.trackier.sdk.TrackierEvent(com.trackier.sdk.TrackierEvent.UPDATE)
+                    val event = com.trackier.sdk.TrackierEvent(com.trackier.sdk.TrackierEvent.ADD_TO_CART)
                     event.param1 = "Param_Name"
                     event.couponCode = "TEST_COUPON"
                     event.discount = 10.5f
                     TrackierSDK.trackEvent(event)
-                    createDynamicLink()
+                    createDynamicLink(context)
                 },
                 modifier = Modifier.padding(8.dp)
             ) {
@@ -94,23 +106,6 @@ fun MainScreen(sensorManager: SensorManager, accelerometer: Sensor?) {
             Button(
                 onClick = {
                     coroutineScope.launch {
-
-
-
-
-//                        try {
-//                            val response = TrackierSDK.createDynamicLink("https://example.com/product") {
-//                                setTitle("Amazing Product")
-//                                setDescription("Check out this amazing product")
-//                                setImageUrl("https://example.com/product.jpg")
-//                                setCustomPath("amazing-product")
-//                                setCampaign("summer-sale")
-//                            }
-//                            Log.d("ShortLink", response.shortUrl)
-//                            shareUrl = response.shortUrl
-//                        } catch (e: Exception) {
-//                            Log.e("ShortLinkError", e.message ?: "Error creating short link")
-//                        }
 
                         AppsFlyerLib.getInstance().setAppInviteOneLink("dRuK")
                         val linkGenerator =
@@ -170,9 +165,7 @@ fun MainScreen(sensorManager: SensorManager, accelerometer: Sensor?) {
                         .clip(CircleShape)
                         .padding(8.dp)
                 )
-
-                // Cloudflare point
-                // Server Deployment // on Dashboard instance
+                
                 IconButton(
                     onClick = {
 
@@ -362,11 +355,11 @@ fun CreateAppsFlyerShortLinkButton() {
     }
 }
 
-private fun createDynamicLink() {
+private fun createDynamicLink(context: Context) {
 
     // Build the dynamic link parameters
     val dynamicLink = DynamicLink.Builder()
-        .setTemplateId("Nq1rt1")
+        .setTemplateId("78")
         .setLink(Uri.parse("https://apptrove.com?utm_redirect=sdk_link"))
         .setDomainUriPrefix("vistmarket.shop")
         .setDeepLinkValue("NewMainActivity")
@@ -396,22 +389,31 @@ private fun createDynamicLink() {
         )
         .setSocialMetaTagParameters(
             SocialMetaTagParameters.Builder()
-                .setTitle("Your Title")
-                .setDescription("Your Description")
-                .setImageLink("https://www.example.com/image.jpg")
+                .setTitle("New Offer Buy 1 Get 2 Free")
+                .setDescription("New Deal is live now just Open Vist market and purchase any product and get 2 product free")
+                .setImageLink("https://storage.googleapis.com/static.trackier.io/images/test-data/downloaded_images/bluetooth_speaker.jpg")
                 .build()
         )
         .build()
     // Call the SDK to create the dynamic link
     TrackierSDK.createDynamicLink(dynamicLink,
         onSuccess = { dynamicLinkUrl ->
+            // Intent for share link
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.type = "text/plain"
+            shareIntent.putExtra(Intent.EXTRA_TEXT, dynamicLinkUrl)
+            context.startActivity(Intent.createChooser(shareIntent, "Share Link"))
             // Use the generated link
             Log.d("dynamicsucess", dynamicLink.toString())
-            println("Dynamic Link Created: $dynamicLinkUrl")
             Log.d("Dynamic Link Result",dynamicLinkUrl)
         },
         onFailure = { errorMessage ->
-//            // Handle the errors
+
+            // Toast Message for Failure
+
+            CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(context, "Link Failed", Toast.LENGTH_SHORT).show()
+            }//            // Handle the errors
 //            Log.d("dynamicfailedtoken","the token is  ${TrackierSDK.getAppToken()}")
           Log.d("dynamicfailedtoken","the Install id  is  ${TrackierSDK.getTrackierId()}")
 

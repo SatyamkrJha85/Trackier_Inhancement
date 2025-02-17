@@ -10,12 +10,14 @@ import android.util.Log
 import com.example.trackier_library.dynamic_link.DynamicLink
 import com.example.trackier_library.dynamic_link.DynamicLinkResponse
 import com.example.trackier_library.dynamic_link.LinkData
+import com.trackier.sdk.Factory.logger
 import com.trackier.sdk.SensorTrackingManager.SensorTrackingManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.*
 
 class TrackierSDKInstance {
@@ -180,7 +182,7 @@ class TrackierSDKInstance {
                     .apply()
         } catch (ex: Exception) {}
     }
-    
+
     private fun setXiaomiReferrerDetails(xiaomiRefererDetails: XiaomiReferrerDetails) {
         refXiaomiDetails = xiaomiRefererDetails
         try {
@@ -221,7 +223,7 @@ class TrackierSDKInstance {
 
 
     private fun makeWorkRequest(kind: String): TrackierWorkRequest {
-        val trackierWorkRequest = TrackierWorkRequest(kind, appToken, this.config.env,this.config.context)
+        val trackierWorkRequest = TrackierWorkRequest(kind, appToken, this.config.env)
         if (this.config.getSDKType() != "android") {
             device.sdkVersion = this.config.getSDKVersion()
         } else {
@@ -253,7 +255,7 @@ class TrackierSDKInstance {
         trackierWorkRequest.customerPhoneNumber = this.customerPhoneNumber
         trackierWorkRequest.preinstallData = this.preinstallData
         trackierWorkRequest.storeRetargeting = getRetargetingData()
-        
+
         return trackierWorkRequest
     }
 
@@ -290,12 +292,12 @@ class TrackierSDKInstance {
                     val installRef = InstallReferrer(this.config.context)
                     val refDetails = installRef.getRefDetails()
                     this.setReferrerDetails(refDetails)
-                    val xiaomiInstallRef = installRef.getXiaomiRefDetails()
-                    if (xiaomiInstallRef != null) {
-                        this.setXiaomiReferrerDetails(xiaomiInstallRef)
-                    }
+                   val xiaomiInstallRef = null
+//                    if (xiaomiInstallRef != null) {
+//                        this.setXiaomiReferrerDetails(xiaomiInstallRef)
+//                    }
                 }
-                
+
             }
         } catch (ex: Exception) {
             Factory.logger.warning("Unable to get referrer data on install")
@@ -304,8 +306,10 @@ class TrackierSDKInstance {
         val wrkRequest = makeWorkRequest(TrackierWorkRequest.KIND_INSTALL)
         try {
             TrackierWorkRequest.enqueue(wrkRequest)
+            Log.e("TrackierSDK","Work request try block"+wrkRequest)
         } catch (ex: Exception) {
             APIRepository.processWork(wrkRequest)
+            Log.e("TrackierSDK","Work request Failed block"+ex.toString())
         }
 
         setInstallTracked()
@@ -356,32 +360,48 @@ class TrackierSDKInstance {
                 .apply()
     }
 
-    suspend fun trackSession() {
+    // Get and set time for session
 
+
+    private fun getLastSessionDate(): String {
+        return Util.getSharedPrefString(this.config.context, Constants.SHARED_PREF_LAST_SESSION_DATE)
+    }
+
+    private fun setLastSessionDate(time: String) {
+        val prefs = Util.getSharedPref(this.config.context)
+        prefs.edit().putString(Constants.SHARED_PREF_LAST_SESSION_DATE, time)
+            .apply()
+    }
+
+
+    suspend fun trackSession() {
         if (!isEnabled || !configLoaded) {
             return
         }
         if (!isInstallTracked()) {
             return
         }
-        collectSensorData()  // Collect sensor data before tracking the session
-
         val currentTs = Date().time
         val currentTime = Util.dateFormatter.format(currentTs)
+        //val currentDate = Util.dateFormatter.format(Date())
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         try {
             val lastSessionTime = getLastSessionTime()
-
-            val wrkRequest = makeWorkRequest(TrackierWorkRequest.KIND_SESSION_TRACK)
-            wrkRequest.sessionTime = lastSessionTime
-            val resp = APIRepository.processWork(wrkRequest)
-            if (resp?.success == true) {
+            val lastSessionDate = getLastSessionDate()
+            if (lastSessionDate != currentDate) {
+                val wrkRequest = makeWorkRequest(TrackierWorkRequest.KIND_SESSION_TRACK)
+                wrkRequest.sessionTime = lastSessionTime
+                APIRepository.processWork(wrkRequest)
                 setLastSessionTime(currentTime)
-                logSessionDataWithSensor()  // Log session with sensor data
-
+                setLastSessionDate(currentDate)
+                Log.d("trackiersdk", "Stored last session date: '$lastSessionDate'")
+                Log.d("trackiersdk", "Generated current date: '$currentDate'")
+            } else {
+                Log.d("trackiersdk","already called for today")
             }
         } catch (e: Exception) {}
     }
-    
+
     suspend fun deeplinkData(url: Uri): ResponseData? {
         var deeplinRes: ResponseData? = null
         val wrkRequest = makeWorkRequest(TrackierWorkRequest.KIND_DEEPLINKS)
@@ -414,7 +434,7 @@ class TrackierSDKInstance {
         Util.setSharedPrefString(this.config.context, Constants.SHARED_PREF_DEEP_LINK_CALLED, "true")
         dlt.onDeepLinking(dlResult)
     }
-    
+
     fun callDeepLinkListenerDynamic(dlObj: ResponseData) {
         val dlt = this.config.getDeepLinkListener() ?: return
         if (dlObj.data?.url?.isNotEmpty() == true) {
@@ -422,14 +442,14 @@ class TrackierSDKInstance {
             dlt.onDeepLinking(dlResult)
         }
     }
-    
+
     fun getRetargetingData(): MutableMap<String, Any> {
         val body = mutableMapOf<String, Any>()
         body["rtgtime"] = Util.getSharedPrefString(this.config.context, Constants.STORE_RETARGETING_TIME)
         body["url"] = Util.getSharedPrefString(this.config.context, Constants.STORE_RETARGETING)
         return body
     }
-    
+
     fun parseDeepLink(uri: Uri?) {
         if (uri == null) return
         var resData: ResponseData? = null
@@ -437,7 +457,7 @@ class TrackierSDKInstance {
             try {
                 resData = deeplinkData(uri)
             } catch (e: Exception) { }
-            
+
             if (isInitialized) {
                 try {
                     if (resData != null) {
@@ -466,6 +486,27 @@ class TrackierSDKInstance {
 
     fun getAppToken(): String {
         return appToken
+    }
+
+    // Call the APi Repo and send the token to server
+
+    suspend fun sendFcmToken(token: String): ResponseData? {
+        if (!isEnabled || !configLoaded) {
+            logger.warning("SDK is not enabled or config is not loaded")
+            return null
+        }
+
+        // Prepare the request body
+        val body = mutableMapOf<String, Any>()
+        body["fcmToken"] = token
+
+        return try {
+            logger.info("Sending FCM token: $token")
+            APIRepository.sendToken(body) // Call the existing sendToken method
+        } catch (ex: Exception) {
+            logger.severe("Failed to send FCM token: ${ex.message}")
+            null
+        }
     }
 
 }

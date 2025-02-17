@@ -1,21 +1,45 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
+# Suppress warnings from external dependencies
+-dontwarn org.bouncycastle.**
+-dontwarn org.conscrypt.**
+-dontwarn org.openjsse.**
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
+-dontwarn com.google.gson.**
+-dontwarn com.trackier.**
+
+
+# Keep only necessary Trackier SDK classes
+-keep class com.trackier.sdk.** { *; }
+
+# Keep Google Play Services classes for Ads & Install Referrer
+-keep class com.google.android.gms.common.ConnectionResult { int SUCCESS; }
+-keep class com.google.android.gms.ads.identifier.AdvertisingIdClient {
+    com.google.android.gms.ads.identifier.AdvertisingIdClient$Info getAdvertisingIdInfo(android.content.Context);
+}
+-keep class com.google.android.gms.ads.identifier.AdvertisingIdClient$Info {
+    java.lang.String getId();
+    boolean isLimitAdTrackingEnabled();
+}
+
+# Keep Install Referrer API
+-keep public class com.android.installreferrer.** { *; }
+
 #
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+-dontwarn kotlin.reflect.jvm.**
+-dontwarn kotlin.reflect.full.**
+-dontwarn kotlin.reflect.jvm.KCallablesJvm
+-dontwarn kotlin.reflect.full.KClasses
+-dontwarn kotlin.reflect.jvm.internal.**
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+  -keep class kotlin.Metadata { *; }
+  -keep class kotlin.reflect.jvm.internal.** { *; }
+#  -keep class kotlin.** { *; } #only this is remaining to comment
+  -dontwarn kotlin.**
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keep class kotlin.** {
+    public protected *;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+
+  # Optimize App Size - Remove unused code & logs
+  #-assumenosideeffects class android.util.Log { *; }
