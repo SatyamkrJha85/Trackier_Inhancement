@@ -366,7 +366,7 @@ private fun createDynamicLink() {
 
     // Build the dynamic link parameters
     val dynamicLink = DynamicLink.Builder()
-        .setTemplateId("Nq1rt1")
+        .setTemplateId("7ytuiug")
         .setLink(Uri.parse("https://apptrove.com?utm_redirect=sdk_link"))
         .setDomainUriPrefix("vistmarket.shop")
         .setDeepLinkValue("NewMainActivity")

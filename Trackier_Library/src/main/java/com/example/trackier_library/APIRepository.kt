@@ -118,7 +118,7 @@ object APIRepository {
                 )
             }
         } catch (e: Exception) {
-            Log.e("TrackierSDK", "Exception: ${e.message}")
+            Log.d("TrackierSDK", "Exception: ${e.message}")
             DynamicLinkResponse(
                 success = false,
                 message = "Failed to create link. Exception: ${e.message}",

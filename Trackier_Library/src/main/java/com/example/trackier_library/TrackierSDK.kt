@@ -296,6 +296,7 @@ object TrackierSDK {
             val response = instance.createDynamicLink(dynamicLink)
             if (response.success) {
                 response.data?.link?.let { link ->
+                    Log.e("TrackierSDK","Your Dynamic Link is : "+ link)
                     onSuccess(link)
                 } ?: onFailure("Failed to retrieve link")
             } else {
@@ -303,7 +304,7 @@ object TrackierSDK {
                     "Error ${it.statusCode} (${it.errorCode}): ${it.codeMsg} - ${it.message}"
                 } ?: response.message ?: "Unknown error"
 
-                Log.e("TrackierDynamicLinkError", errorMessage)
+                Log.e("TrackierSDK", errorMessage)
                 onFailure(errorMessage)
             }
         }
