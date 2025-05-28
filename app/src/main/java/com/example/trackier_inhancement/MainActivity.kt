@@ -40,15 +40,11 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var sensorManager: SensorManager
-    private var accelerometer: Sensor? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize SensorManager and accelerometer
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
 
         // Retrieve deep link data
@@ -61,7 +57,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Trackier_InhancementTheme {
-                MainScreen(sensorManager, accelerometer)
+                MainScreen()
             }
         }
 
@@ -93,7 +89,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(sensorManager: SensorManager, accelerometer: Sensor?) {
+fun MainScreen() {
 
     val coroutineScope = rememberCoroutineScope()
     var shareUrl by remember { mutableStateOf("") }
@@ -132,9 +128,6 @@ fun MainScreen(sensorManager: SensorManager, accelerometer: Sensor?) {
             ) {
                 Text("Track Event")
             }
-
-
-
 
             // Share URL Section
             Row(
