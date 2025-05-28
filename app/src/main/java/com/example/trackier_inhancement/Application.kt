@@ -28,6 +28,8 @@ class Application:Application() {
             Log.d("DeepLinkHandlerData", "deeplink getCampaign " + result.getCampaign())
             Log.d("DeepLinkHandlerData", "deeplink getP1 " + result.getP1())
             Log.d("DeepLinkHandlerData", "deeplink getP2 " + result.getP2())
+            Log.d("DeepLinkHandlerData", "deeplink getSdkParams " + result.getSdkParams())
+            Log.d("DeepLinkHandlerData", "deeplink getSdkParamValue id: " + result.getSdkParamValue("id"))
 
         }
     }
