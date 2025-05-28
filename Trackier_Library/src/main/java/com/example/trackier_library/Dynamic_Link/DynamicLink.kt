@@ -1,69 +1,101 @@
-package com.example.trackier_library.Dynamic_Link
+package com.example.trackier_library.dynamic_link
 
+import android.net.Uri
+import android.util.Log
+import com.trackier.sdk.Constants
+import com.trackier.sdk.TrackierSDK
+import com.trackier.sdk.TrackierSDKInstance
+import com.trackier.sdk.TrackierWorkRequest
+import com.trackier.sdk.Util
 
-import androidx.annotation.Keep
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+class DynamicLink private constructor() {
+    private var templateId: String = ""
+    private var link: Uri? = null
+    private var domainUriPrefix: String = ""
+    private var deepLinkValue: String = ""
+    private var androidParameters: AndroidParameters? = null
+    private var iosParameters: IosParameters? = null
+    private var desktopParameters: DesktopParameters? = null
+    private var sdkParameters: Map<String, String> = emptyMap()
+    private var socialMetaTagParameters: SocialMetaTagParameters? = null
 
-// Model
+    private var channel: String = ""
+    private var campaign: String = ""
+    private var mediaSource: String = ""
+    private var p1: String = ""
+    private var p2: String = ""
+    private var p3: String = ""
+    private var p4: String = ""
+    private var p5: String = ""
 
-@Keep
-@JsonClass(generateAdapter = true)
-data class DynamicLinkConfig(
-    val longUrl: String,
-    val title: String? = null,
-    val description: String? = null,
-    val imageUrl: String? = null,
-    val customPath: String? = null,
-    val customDomain: String? = null,
-    val campaign: String? = null,
-    val medium: String? = null,
-    val source: String? = null,
-    val additionalParams: Map<String, String>? = null
-)
+    class Builder {
+        private val dynamicLink = DynamicLink()
 
-@Keep
-@JsonClass(generateAdapter = true)
-data class DynamicLinkResponse(
-    @Json(name = "shortUrl") val shortUrl: String,
-    @Json(name = "longUrl") val longUrl: String,
-    @Json(name = "analytics") val analytics: DynamicLinkAnalytics?
-)
+        fun setTemplateId(templateId: String) = apply { dynamicLink.templateId = templateId }
+        fun setLink(link: Uri) = apply { dynamicLink.link = link }
+        fun setDomainUriPrefix(domainUriPrefix: String) = apply { dynamicLink.domainUriPrefix = domainUriPrefix }
+        fun setDeepLinkValue(deepLinkValue: String) = apply { dynamicLink.deepLinkValue = deepLinkValue }
+        fun setAndroidParameters(androidParameters: AndroidParameters) = apply { dynamicLink.androidParameters = androidParameters }
+        fun setIosParameters(iosParameters: IosParameters) = apply { dynamicLink.iosParameters = iosParameters }
+        fun setDesktopParameters(desktopParameters: DesktopParameters) = apply { dynamicLink.desktopParameters = desktopParameters }
+        fun setSDKParameters(sdkParameters: Map<String, String>) = apply { dynamicLink.sdkParameters = sdkParameters }
+        fun setSocialMetaTagParameters(socialMetaTagParameters: SocialMetaTagParameters) = apply { dynamicLink.socialMetaTagParameters = socialMetaTagParameters }
 
-@Keep
-@JsonClass(generateAdapter = true)
-data class DynamicLinkAnalytics(
-    @Json(name = "clicks") val clicks: Int,
-    @Json(name = "uniqueClicks") val uniqueClicks: Int
-)
+        fun setAttributionParameters(
+            channel: String = "",
+            campaign: String = "",
+            mediaSource: String = "",
+            p1: String = "",
+            p2: String = "",
+            p3: String = "",
+            p4: String = "",
+            p5: String = ""
+        ) = apply {
+            dynamicLink.channel = channel
+            dynamicLink.campaign = campaign
+            dynamicLink.mediaSource = mediaSource
+            dynamicLink.p1 = p1
+            dynamicLink.p2 = p2
+            dynamicLink.p3 = p3
+            dynamicLink.p4 = p4
+            dynamicLink.p5 = p5
+        }
 
+        fun build(): DynamicLink {
+            return dynamicLink
+        }
+    }
 
+    fun toDynamicLinkConfig(): DynamicLinkConfig {
 
-class DynamicLinkBuilder {
-    private var title: String? = null
-    private var description: String? = null
-    private var imageUrl: String? = null
-    private var customPath: String? = null
-    private var customDomain: String? = null
-    private var campaign: String? = null
-    private var medium: String? = null
-    private var source: String? = null
-    private val additionalParams = mutableMapOf<String, String>()
-
-    fun setTitle(title: String) = apply { this.title = title }
-    fun setDescription(description: String) = apply { this.description = description }
-    fun setImageUrl(imageUrl: String) = apply { this.imageUrl = imageUrl }
-    fun setCustomPath(customPath: String) = apply { this.customPath = customPath }
-    fun setCustomDomain(customDomain: String) = apply { this.customDomain = customDomain }
-    fun setCampaign(campaign: String) = apply { this.campaign = campaign }
-    fun setMedium(medium: String) = apply { this.medium = medium }
-    fun setSource(source: String) = apply { this.source = source }
-    fun addParameter(key: String, value: String) = apply { additionalParams[key] = value }
-
-    fun build(longUrl: String): DynamicLinkConfig {
         return DynamicLinkConfig(
-            longUrl, title, description, imageUrl, customPath, customDomain,
-            campaign, medium, source, additionalParams
+           installId = TrackierSDK.getTrackierId(),
+            appKey = TrackierSDK.getAppToken(),
+          //  installId = "f94f61ac-fcc4-4cee-a2a1-4007f5058021",
+          //  appKey ="24e02619-be55-426b-801b-ca72f86e35fa",
+            templateId = templateId,
+            link = link?.toString() ?: "",
+            brandDomain = domainUriPrefix,
+            deepLinkValue = deepLinkValue,
+            sdkParameter = sdkParameters,
+            redirection = Redirection(
+                android = androidParameters?.redirectLink ?: "",
+                ios = iosParameters?.redirectLink ?: "",
+                desktop = desktopParameters?.redirectLink ?: ""
+            ),
+            attrParameter = mapOf(
+                "channel" to channel,
+                "campaign" to campaign,
+                "media_source" to mediaSource,
+                "p1" to p1,
+                "p2" to p2,
+                "p3" to p3,
+                "p4" to p4,
+                "p5" to p5
+            ).filterValues { it.isNotEmpty() },
+            socialMedia = socialMetaTagParameters?.let {
+                SocialMedia(it.title, it.description, it.imageLink)
+            }
         )
     }
 }

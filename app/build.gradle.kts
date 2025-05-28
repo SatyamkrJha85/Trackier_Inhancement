@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
 }
 
 android {
@@ -18,13 +19,25 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("my-release-key.jks")
+            storePassword = "12345678"
+            keyAlias = "my-key-alias"
+            keyPassword = "12345678"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -50,7 +63,19 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)
-    implementation(project(":Trackier_Library"))
+
+
+    // before 4 mb app size after adding excule now size is 3.9 and after add proguard now size is 3.4
+
+    // after adding this : -assumenosideeffects class android.util.Log { *; } now size is 3.1
+
+    implementation(project(":Trackier_Library")){
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-reflect") // Exclude reflection
+    }
+
+    implementation("com.squareup.moshi:moshi:1.14.0") // Core Moshi library
+    implementation("com.squareup.moshi:moshi-kotlin:1.14.0") // Kotlin Moshi without reflection
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.14.0") // Codegen-based Moshi (No reflection)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -61,5 +86,9 @@ dependencies {
 
     implementation ("com.appsflyer:af-android-sdk:6.12.1")
     implementation ("com.android.installreferrer:installreferrer:2.2")
+    implementation ("com.adjust.sdk:adjust-android:4.33.0")
+
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+
 
 }

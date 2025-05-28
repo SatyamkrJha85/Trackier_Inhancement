@@ -17,7 +17,6 @@ class TrackierWorkRequest(
     val kind: String,
     private val appToken: String,
     private val mode: String,
-    private val context: Context
 ) {
     var gaid: String? = null
     var isLAT = false
@@ -46,12 +45,11 @@ class TrackierWorkRequest(
     var deeplinkUrl = ""
 
 
-    private val sensorTrackingManager = SensorTrackingManager(context)
+
     private var sensorData: Map<String, Float> = emptyMap()
 
     init {
         // Start tracking sensors when the object is created
-        sensorTrackingManager.startTracking()
     }
 
 
@@ -114,7 +112,6 @@ class TrackierWorkRequest(
         body["storeRetargeting"] = storeRetargeting
 
         // Add sensor data to the body if available
-        sensorData = sensorTrackingManager.getSensorData()
         body["sensorData"] = sensorData
 
         return body
@@ -135,7 +132,7 @@ class TrackierWorkRequest(
         body["lastSessionTime"] = this.sessionTime
         return body
     }
-    
+
     fun getDeeplinksData(): MutableMap<String, Any> {
         val body = mutableMapOf<String, Any>()
         body["url"] = this.deeplinkUrl.toString()
@@ -183,5 +180,6 @@ class TrackierWorkRequest(
                 .build()
             WorkManager.getInstance().enqueue(myWorkRequest)
         }
+
     }
 }
