@@ -65,6 +65,28 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Test the new resolveDeeplinkUrl function
+        val testUrl = "https://trackier58.u9ilnk.me/d/PGJ2m4NtPd"
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val resolvedUrl = TrackierSDK.resolveDeeplinkUrl(testUrl)
+                Log.d("DeeplinkResolverTest", "Resolved URL: $resolvedUrl")
+            } catch (e: Exception) {
+                Log.e("DeeplinkResolverTest", "Error resolving deeplink: ", e)
+            }
+        }
+
+        // Test the new resolveDeeplinkUrl function
+        val testUrl2 = "https://trackier58.u9ilnk.me/d/67cafc5938fa96aa7e7750c9"
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val resolvedUrl = TrackierSDK.resolveDeeplinkUrl(testUrl2)
+                Log.d("DeeplinkResolverTest", "Resolved URL: $resolvedUrl")
+            } catch (e: Exception) {
+                Log.e("DeeplinkResolverTest", "Error resolving deeplink: ", e)
+            }
+        }
+
     }
 
 

@@ -365,5 +365,38 @@ object TrackierSDK {
 //        }
 //    }
 
+    /**
+     * Resolves a deferred deeplink URL by calling the server with device/app metadata and returns the resolved URL string.
+     * This does not trigger any listeners or SDK state, just returns the resolved URL.
+     * @param inputUrl The URL to resolve
+     * @return The resolved (deferred) URL, or empty string if not successful
+     */
+    @JvmStatic
+    suspend fun resolveDeeplinkUrl(inputUrl: String): String {
+        return try {
+            // Build the request body using the same logic as getDeeplinksData
+            val instanceConfig = instance.config
+            val device = instanceConfig.context.let { ctx ->
+                val dev = DeviceInfo()
+                DeviceInfo.init(dev, ctx)
+                dev
+            }
+            val body = mutableMapOf<String, Any>()
+            body["url"] = inputUrl
+            body["os"] = device.osName
+            body["osv"] = device.osVersion
+            body["sdkv"] = Constants.SDK_VERSION
+            body["apv"] = device.appVersion.toString()
+            body["insId"] = getTrackierId()
+            body["appKey"] = getAppToken()
+
+            // Call the resolver endpoint
+            val response = APIRepository.publicResolveDeeplinks(body)
+            response.data?.url ?: ""
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
 }
 

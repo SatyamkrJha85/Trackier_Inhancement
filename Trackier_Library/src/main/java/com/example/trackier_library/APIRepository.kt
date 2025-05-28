@@ -95,6 +95,11 @@ object APIRepository {
         return trackierDeeplinksApi.sendDeeplinksData(body)
     }
 
+    // Expose a public wrapper for sendDeeplinks without changing its visibility
+    suspend fun publicResolveDeeplinks(body: MutableMap<String, Any>): ResponseData {
+        return sendDeeplinks(body)
+    }
+
     // for dynamic link
     suspend fun sendDynamiclinks(body: MutableMap<String, Any>): DynamicLinkResponse {
         // Convert request body to JSON string for logging
