@@ -35,6 +35,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Intent filter for deep linking -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- App Link -->
+                <data
+                    android:host="trackier58.u9ilnk.me"
+                    android:pathPrefix="/d"
+                    android:scheme="https" />
+            </intent-filter>
+
 
         </activity>
     </application>

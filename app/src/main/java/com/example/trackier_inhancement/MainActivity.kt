@@ -50,6 +50,15 @@ class MainActivity : ComponentActivity() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
+
+        // Retrieve deep link data
+        val deepLinkUri: Uri? = intent?.data
+        deepLinkUri?.let {
+            Log.d("DeepLinkHandlerData", "Received Deep Link URI: $it")
+            TrackierSDK.parseDeepLink(it)
+            finish()
+        }
+
         setContent {
             Trackier_InhancementTheme {
                 MainScreen(sensorManager, accelerometer)
@@ -102,52 +111,7 @@ fun MainScreen(sensorManager: SensorManager, accelerometer: Sensor?) {
                 Text("Track Event")
             }
 
-            // Button to Create Short Links
-            Button(
-                onClick = {
-                    coroutineScope.launch {
 
-                        AppsFlyerLib.getInstance().setAppInviteOneLink("dRuK")
-                        val linkGenerator =
-                            ShareInviteHelper.generateInviteUrl(context)
-                        linkGenerator.setCampaign("HelloCampaign")
-
-                        linkGenerator.addParameter("af_custom_shortlink", "SendSortLink")
-
-
-                        val logInviteMap = HashMap<String, String>().apply {
-                            put("referrerId", "REFERRER_ID") // Replace REFERRER_ID with the actual value
-                            put("campaign", "summer_sale")
-                        }
-
-                        ShareInviteHelper.logInvite(context, "mobile_share", logInviteMap)
-                        Log.d("AppsflyerInvideLink",logInviteMap.toString())
-
-
-                        val listener = object : LinkGenerator.ResponseListener {
-                            override fun onResponse(s: String) {
-                                Log.d("ShareInviteLink", "Share invite link: $s")
-                                // ...
-                            }
-
-                            override fun onResponseError(s: String) {
-                                Log.d("Fail Invite Link", "onResponseError called")
-                            }
-                        }
-                        linkGenerator.generateLink(context, listener)
-
-                    }
-                },
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text("Create Short Link")
-            }
-
-
-            shareInviteLink(context,"HelloLink")
-
-            CreateAndShareInviteLinkButton()
-            CreateAppsFlyerShortLinkButton()
 
 
             // Share URL Section
@@ -180,180 +144,8 @@ fun MainScreen(sensorManager: SensorManager, accelerometer: Sensor?) {
 
 
 
-@Composable
-fun CreateShortLinkButton() {
-    val context = LocalContext.current // Get the current context
-    val coroutineScope = rememberCoroutineScope() // Remember the coroutine scope
-
-    Button(
-        onClick = {
-            coroutineScope.launch {
-                try {
-                    // Configure AppsFlyer OneLink
-                    AppsFlyerLib.getInstance().setAppInviteOneLink("dRuK")
-
-                    // Generate the invite URL
-                    val linkGenerator = ShareInviteHelper.generateInviteUrl(context).apply {
-                        setCampaign("HelloCampaign")
-                        addParameter("af_custom_shortlink", "SendSortLink")
-                    }
-
-                    // Log the invite details
-                    val logInviteMap = mapOf(
-                        "referrerId" to "REFERRER_ID", // Replace with actual referrer ID
-                        "campaign" to "summer_sale"
-                    )
-                    ShareInviteHelper.logInvite(context, "mobile_share", logInviteMap)
-                    Log.d("AppsflyerInviteLink", logInviteMap.toString())
-
-                    // Response listener for generated link
-                    val listener = object : LinkGenerator.ResponseListener {
-                        override fun onResponse(s: String) {
-                            Log.d("ShareInviteLink", "Generated invite link: $s")
-                            // Handle success (e.g., display or share the link)
-                        }
-
-                        override fun onResponseError(s: String) {
-                            Log.e("FailInviteLink", "Error generating link: $s")
-                            // Handle failure (e.g., show error message)
-                        }
-                    }
-
-                    // Generate the link with the listener
-                    linkGenerator.generateLink(context, listener)
-                } catch (e: Exception) {
-                    Log.e("AppsFlyerError", "Error creating short link: ${e.message}")
-                    // Handle exceptions (e.g., display a toast or log error)
-                }
-            }
-        },
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Text("Create Short Link")
-    }
-}
 
 
-@Composable
-fun CreateAndShareInviteLinkButton() {
-    val context = LocalContext.current // Obtain the current context
-    val coroutineScope = rememberCoroutineScope() // Remember coroutine scope
-
-    Button(
-        onClick = {
-            coroutineScope.launch {
-                try {
-                    // Set up AppsFlyer OneLink
-                    AppsFlyerLib.getInstance().setAppInviteOneLink("dRuK")
-
-                    // Generate the invite URL
-                    val linkGenerator = ShareInviteHelper.generateInviteUrl(context).apply {
-                        setCampaign("HelloCampaign")
-                        addParameter("af_custom_shortlink", "SendSortLink")
-                        addParameter("referrerId", "REFERRER_ID") // Replace with actual referrer ID
-                        addParameter("campaign", "summer_sale")
-                    }
-
-                    // Listener to handle the response
-                    val listener = object : LinkGenerator.ResponseListener {
-                        override fun onResponse(s: String) {
-                            Log.d("ShareInviteLink", "Generated invite link: $s")
-                            shareInviteLink(context, s) // Share the link
-                        }
-
-                        override fun onResponseError(s: String) {
-                            Log.e("FailInviteLink", "Error generating invite link: $s")
-                        }
-                    }
-
-                    // Generate the link
-                    linkGenerator.generateLink(context, listener)
-
-                    // Log the invite details
-                    val logInviteMap = mapOf(
-                        "referrerId" to "REFERRER_ID",
-                        "campaign" to "summer_sale"
-                    )
-                    ShareInviteHelper.logInvite(context, "mobile_share", logInviteMap)
-                    Log.d("AppsflyerInviteLink", logInviteMap.toString())
-
-                } catch (e: Exception) {
-                    Log.e("AppsFlyerError", "Error creating invite link: ${e.message}")
-                }
-            }
-        },
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Text("Create and Share Invite Link")
-    }
-}
-
-// Function to share the invite link
-private fun shareInviteLink(context: Context, link: String) {
-    try {
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, "Check this out: $link") // Customize message
-        }
-        context.startActivity(Intent.createChooser(shareIntent, "Share Invite Link"))
-    } catch (e: Exception) {
-        Log.e("ShareInviteError", "Error sharing invite link: ${e.message}")
-    }
-}
-
-
-@Composable
-fun CreateAppsFlyerShortLinkButton() {
-    val context = LocalContext.current // Get the current context
-    val coroutineScope = rememberCoroutineScope() // Remember the coroutine scope
-
-    Button(
-        onClick = {
-            coroutineScope.launch {
-                try {
-                    // Configure AppsFlyer OneLink
-                    AppsFlyerLib.getInstance().setAppInviteOneLink("dRuK")
-
-                    // Generate the invite URL
-                    val linkGenerator = ShareInviteHelper.generateInviteUrl(context).apply {
-                        setCampaign("HelloCampaign")
-                        addParameter("af_custom_shortlink", "SendSortLink")
-                    }
-
-                    // Log the invite details
-                    val logInviteMap = mapOf(
-                        "referrerId" to "REFERRER_ID", // Replace with actual referrer ID
-                        "campaign" to "summer_sale"
-                    )
-                    ShareInviteHelper.logInvite(context, "mobile_share", logInviteMap)
-                    Log.d("AppsflyerInviteLink", logInviteMap.toString())
-
-                    // Response listener for generated link
-                    val listener = object : LinkGenerator.ResponseListener {
-                        override fun onResponse(s: String) {
-                            Log.d("ShareInviteLink", "Generated invite link: $s")
-                            // Handle success (e.g., display or share the link)
-                        }
-
-                        override fun onResponseError(s: String) {
-                            Log.e("FailInviteLink", "Error generating link: $s")
-                            // Handle failure (e.g., show error message)
-                        }
-                    }
-
-                    // Generate the link with the listener
-                    linkGenerator.generateLink(context, listener)
-                } catch (e: Exception) {
-                    Log.e("AppsFlyerError", "Error creating short link: ${e.message}")
-                    // Handle exceptions (e.g., display a toast or log error)
-                }
-            }
-        },
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Text("Create Appsflyer Short Link")
-    }
-}
 
 private fun createDynamicLink(context: Context) {
 

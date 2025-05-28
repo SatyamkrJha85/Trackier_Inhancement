@@ -1,11 +1,14 @@
 package com.example.trackier_inhancement
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
 import com.adjust.sdk.Adjust
 import com.adjust.sdk.AdjustConfig
 import com.adjust.sdk.LogLevel
 import com.appsflyer.AppsFlyerLib
+import com.trackier.sdk.DeepLink
+import com.trackier.sdk.DeepLinkListener
 import com.trackier.sdk.TrackierSDK
 import com.trackier.sdk.TrackierSDKConfig
 import kotlinx.coroutines.Dispatchers
@@ -14,10 +17,26 @@ import kotlinx.coroutines.launch
 
 class Application:Application() {
 
+
+    object deepLinkListener : DeepLinkListener {
+        override fun onDeepLinking(result: DeepLink) {
+            // we have deepLink object and we can get any valve from Object
+            Log.d("DeepLinkHandlerData", "deeplink getDeepLinkValue " + result.getDeepLinkValue())
+            Log.d("DeepLinkHandlerData", "deeplink getStringValue " + result.getStringValue("deep_link"))
+            Log.d("DeepLinkHandlerData", "deeplink getData " + result.getData())
+            Log.d("DeepLinkHandlerData", "deeplink getUrl " + result.getUrl())
+            Log.d("DeepLinkHandlerData", "deeplink getCampaign " + result.getCampaign())
+            Log.d("DeepLinkHandlerData", "deeplink getP1 " + result.getP1())
+            Log.d("DeepLinkHandlerData", "deeplink getP2 " + result.getP2())
+
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
 
-        val sdkConfig = TrackierSDKConfig(this, "ee9f21fb-5848-4ed9-8d9c-e4093e6d220c", "development")
+        val sdkConfig = TrackierSDKConfig(this, "be82576a-b4e8-40a7-8fe2-c25d924ddc58", "development")
+        sdkConfig.setDeepLinkListener(deepLinkListener)
         TrackierSDK.initialize(sdkConfig,this)
 
 
